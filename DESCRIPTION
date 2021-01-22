@@ -1,0 +1,22 @@
+Package: wikimorphemesedit
+Title: Add Morphology to Wiktionary Articles 
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Jonathan", "Bratt", email = "jonathan.bratt@macmillan.com", 
+           role = c("aut"),
+           comment = c(ORCID = "0000-0003-2859-0076")
+    ),
+    person("Jon", "Harmon", email = "jon.harmon@macmillan.com", 
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-4781-4346")
+    )
+    )
+Description: Some wiktionary pages are missing what seem to be obvious 
+    morphology breakdowns. This package suggests such breakdowns and, if a 
+    human agrees that they make sense, allows for easy addition of those 
+    morphologies to the appropriate wiktionary page.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
