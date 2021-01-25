@@ -96,9 +96,6 @@ generate_morphology_suffix_template <- function(base_word, suffix) {
   # This function assumes that base_word is NOT a prefix here.
   return(paste0("Morphologically {{suffix|en|", base_word, "|", suffix,"}}"))
 }
-generate_morphology_suffix_template("conserve", "ation")
-
-
 
 
 # submit_morphology_edit --------------------------------------------------
