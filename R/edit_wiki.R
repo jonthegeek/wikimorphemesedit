@@ -187,7 +187,7 @@ submit_morphology_edit <- function(word = "Project:Sandbox",
                   section = sn,
                   token = csrf_token,
                   format = "json",
-                  bot = "true",
+                  # bot = "true",
                   minor = "true",
                   appendtext = template_text)
   resp <- httr::POST(url = base_url, body = params4)
