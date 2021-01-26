@@ -70,7 +70,11 @@ get_section_text <- function(word, section_number) {
   return(section_text)
 }
 
-# generate_morphology_template --------------------------------------------
+# generate_morphology_*_template --------------------------------------------
+
+# Depending on the outcome of the discussion at
+# https://en.wiktionary.org/wiki/Wiktionary:Beer_parlour/2021/January#Adding_surface_analyses_to_fill_in_gaps_in_suffix_categories
+# ... we may need to add a `|nocat=1` parameter to these templates.
 
 #' @export
 generate_morphology_prefix_template <- function(prefix, base_word) {
@@ -127,6 +131,7 @@ submit_morphology_edit <- function(word = "Project:Sandbox",
                                    password) {
   # watch out! Section might be "Etymology 1", if there are multiple.
   # make this more robust...
+  # https://github.com/jonthegeek/wikimorphemesedit/issues/2
   sn <- get_section_number(word, section = "Etymology")
 
   # make sure that this is not a repeat edit.
@@ -184,7 +189,7 @@ submit_morphology_edit <- function(word = "Project:Sandbox",
                   section = sn,
                   token = csrf_token,
                   format = "json",
-                  # bot = "true",
+                  # bot = "true", # not technically a bot yet (maybe not ever)
                   minor = "true",
                   appendtext = template_text)
   resp <- httr::POST(url = base_url, body = params4)
