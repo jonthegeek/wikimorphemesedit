@@ -72,14 +72,18 @@ get_section_text <- function(word, section_number) {
 
 # generate_morphology_*_template --------------------------------------------
 
-# Depending on the outcome of the discussion at
+# Based on the discussion at
 # https://en.wiktionary.org/wiki/Wiktionary:Beer_parlour/2021/January#Adding_surface_analyses_to_fill_in_gaps_in_suffix_categories
-# ... we may need to add a `|nocat=1` parameter to these templates.
+# ... I have added the `|nocat=1` parameter to these templates. This prevents
+# the breakdown showing up in the corresponding affix categories, but the
+# template will still be in the page wikitext.
 
 #' @export
 generate_morphology_prefix_template <- function(prefix, base_word) {
   # Note: before now, figure out whether second piece is a suffix or not
-  return(paste0("Morphologically {{prefix|en|", prefix, "|", base_word,"}}"))
+  return(paste0("Morphologically {{prefix|en|",
+                prefix, "|", base_word,
+                "|nocat=1}}"))
 }
 
 #' @export
@@ -88,7 +92,9 @@ generate_morphology_confix_template <- function(prefix, suffix) {
   # Morphologically {{confix|en|astro|logy}}
   # or
   # Morphologically {{suffix|en|conserve|ation}}
-  return(paste0("Morphologically {{confix|en|", prefix, "|", suffix,"}}"))
+  return(paste0("Morphologically {{confix|en|",
+                prefix, "|", suffix,
+                "|nocat=1}}"))
 }
 
 #' @export
@@ -98,7 +104,9 @@ generate_morphology_suffix_template <- function(base_word, suffix) {
   # or
   # Morphologically {{suffix|en|conserve|ation}}
   # This function assumes that base_word is NOT a prefix here.
-  return(paste0("Morphologically {{suffix|en|", base_word, "|", suffix,"}}"))
+  return(paste0("Morphologically {{suffix|en|",
+                base_word, "|", suffix,
+                "|nocat=1}}"))
 }
 
 
@@ -136,6 +144,16 @@ submit_morphology_edit <- function(word = "Project:Sandbox",
 
   # make sure that this is not a repeat edit.
   current_section_text <- get_section_text(word, sn)
+
+  # if etymology section not found, don't make edit! Maybe later we can do this
+  # automatically, but for now, require section to exist already
+  if (length(current_section_text) != 1) {
+    message("No Etymology section found for ",
+            word,
+            "; no edits will be made.")
+    return(FALSE)
+  }
+
   if (stringr::str_detect(current_section_text,
                           stringr::coll(trimws(template_text)))) {
     message("No new edits to make on page ", word)
@@ -143,7 +161,7 @@ submit_morphology_edit <- function(word = "Project:Sandbox",
   }
 
   # put edit on a new line.
-  template_text <- paste0("\n", template_text, "\n")
+  template_text <- paste0("\n\n", template_text, "\n")
 
   base_url <- "https://en.wiktionary.org/w/api.php"
   url <- paste0(base_url, "?action=query&meta=tokens&type=login&format=json")
