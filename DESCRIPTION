@@ -1,6 +1,6 @@
 Package: wikimorphemesedit
 Title: Add Morphology to Wiktionary Articles 
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
     person("Jonathan", "Bratt", email = "jonathan.bratt@macmillan.com", 
            role = c("aut"),
@@ -29,3 +29,7 @@ Imports:
     magrittr (>= 1.5),
     rlang (>= 0.4.8),
     stringr (>= 1.4.0)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

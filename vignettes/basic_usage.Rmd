@@ -1,0 +1,105 @@
+---
+title: "Basic Usage"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basic Usage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  eval = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(wikimorphemesedit)
+library(dplyr)
+```
+
+This package supplies tools to streamline the submission of multiple edits to
+Wiktionary. The process currently still involves a bit of setup. This is partly
+by design--we don't want to make it *too* easy to submit edits without having
+more robust safeguards in place against undesirable edits.
+
+This vignette assumes that we already have a list of edits we want to submit to
+Wiktionary. For example:
+
+```{r}
+# see the vignette in {wikimorphemes} for suggestions on identifying edits
+gs_url <- "https://docs.google.com/spreadsheets/d/11feSn_TzkfSHE2rG1VaBut8UG-yzezXqAgTcCQtAI0g/"
+
+checked_candidates <- googlesheets4::read_sheet(ss = gs_url,
+                                                sheet = "candidates") %>% 
+  dplyr::filter(`correct?` == "y") %>%
+  dplyr::select(word, possible_breakdown)
+
+# before submitting edits, all proposed changes should be checked and rechecked
+# by a competent human. We want to be good citizens of the wikiverse. :)
+```
+
+The general process is straightforward: loop through the edits, and submit them
+one at a time.
+
+```{r}
+
+# first do a "dry run":
+
+for (w in checked_candidates$word) {
+  breakdown <- checked_candidates %>% 
+    dplyr::filter(word == w) %>% 
+    dplyr::pull(possible_breakdown)
+  # there *should* be only one breakdown per word, but this is subject to 
+  # human error, so let's check
+  if (length(breakdown) > 1) {
+    stop(paste("multiple breakdowns found for word:", w))
+  }
+  
+  # the breakdown has been recorded as "baseword ## suffix". Extract pieces...
+  pieces <- trimws(stringr::str_split(breakdown, "##", )[[1]])
+  # in this particular case, we always have baseword + suffix
+  base_word <- pieces[[1]]
+  suffix <- pieces[[2]]
+  # generate the edit that will be submitted to wiktionary. Be sure to use
+  # the correct template here!!
+  template <- generate_morphology_suffix_template(base_word = base_word, 
+                                                  suffix = suffix)
+  cat(w, ":", template, "\n")
+}
+
+# if the output from the above looks correct, we can change the loop to submit 
+# the edits for real. We'll need to have our username and password in our 
+# session environment
+for (w in checked_candidates$word) {
+  breakdown <- checked_candidates %>% 
+    dplyr::filter(word == w) %>% 
+    dplyr::pull(possible_breakdown)
+  cat("doing word:", w, "\n")
+  # the breakdown has been recorded as "baseword ## suffix". Extract pieces...
+  pieces <- trimws(stringr::str_split(breakdown, "##", )[[1]])
+  # in this particular case, we always have baseword + suffix
+  base_word <- pieces[[1]]
+  suffix <- pieces[[2]]
+  # generate the edit that will be submitted to wiktionary. Be sure to use
+  # the correct template here!!
+  template <- generate_morphology_suffix_template(base_word = base_word, 
+                                                  suffix = suffix)
+  cat("submitting edit:", template, "\n")
+
+  result <- submit_morphology_edit(word = w,
+                                   template_text = template,
+                                   my_username, my_password)
+  cat("edit successful:", result, "\n") #TRUE if success
+  Sys.sleep(5) # probably don't need to wait this long, but let's take it slow.
+}
+
+# Note that the edit will be aborted if no "Etymology" section exists yet.
+# For now, those would have to be manually created.
+
+```
+
+The above code is a simple example. A more sophisticated loop would save the
+results from each edit so that any unsuccessful cases could be examined.
